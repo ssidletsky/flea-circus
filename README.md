@@ -13,9 +13,9 @@ Technically, fleas and rings do not exist in the implementation. The simulation 
 
 ###### Edit:
 
-I have changed the concurrency model of a program to a worker pool. Previously each simulation was running in its own goroutine. To check what is the best number of workers for the task I have updated the benchmarks. The results show, that for the task without any I/O there is no advantage to running it concurrently on a single processor system.I have changed the concurrency model of a program to a worker pool. Previously each simulation was running in its own goroutine. To check what is the best number of workers for the task I have updated the benchmarks. The results show, that for the task without any I/O there is no advantage to running it concurrently on a single processor system.I have changed the concurency model of a progrem to a worker pool. Previously each simulation was running in its own goroutine. To check what is the best number of workers for the task I have updated the benchmars. The results shows, for the task without any I/O there is no advantage to run it concurently on a single processor system.
+I have changed the concurency model of a progrem to a worker pool. Previously each simulation was running in its own goroutine. To check what is the best number of workers for the task I have updated the benchmars. The results shows, for the task without any I/O there is no advantage to run it concurently on a single processor system.
 
-This conclusion is also proven by CPU profiling. Once there is more than one goroutine, runtime starts spending more time/memory to handle additional overhead to manage them instead to run simulations.This conclution is also proven by cpu profiling. Once there is more then one goroutine, runtime starts sppent more time/memory to handle additional overhad to manage them.
+This conclution is also proven by cpu profiling. Once there is more then one goroutine, runtime starts sppent more time/memory to handle additional overhad to manage them.
 
 # Execution
 
