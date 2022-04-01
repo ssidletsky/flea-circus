@@ -36,7 +36,7 @@ goos: darwin
 goarch: amd64
 pkg: flea-circus
 cpu: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz
-BenchmarkRunSimulations-12            12        1097876355 ns/op        717565934 B/op  22113681 allocs/op
+BenchmarkRunSimulations-12             6         857128091 ns/op        285255842 B/op  17611066 allocs/op
 PASS
-ok      flea-circus     23.964s
+ok      flea-circus     6.037s
 ```
