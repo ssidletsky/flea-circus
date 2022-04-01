@@ -14,6 +14,14 @@ const (
 	bellRings = 50
 	// number of simulations
 	simulations = 100
+	// number of workers
+	workers = 1
+
+	// indexes of moves
+	moveLeft  = 0
+	moveUp    = 1
+	moveRight = 2
+	moveDown  = 3
 )
 
 // moves contain a list of possible coordinates adjustments
@@ -24,21 +32,25 @@ var moves = [][]int{
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	average := runSimulations(simulations)
+	average := runSimulations(simulations, workers)
 	fmt.Printf("Expected average: %.6f\n", average)
 }
 
 // runSimulations executes *simulationsCount* number of flea circus simulations.
-// Every simulation is running concurrently inside its own goroutine.
-// The result of each goroutine is a number of free squares left after the simulation is done.
+// Simulations may run concurrently if >1 *workers* provided.
+// The result of each simulation is a number of free squares left after the simulation is done.
 // The function returns the expected number of unoccupied squares.
-func runSimulations(simulationsCount int) float32 {
+func runSimulations(simulationsCount int, workers int) float32 {
+	jobsc := jobs(simulationsCount)
+
 	freeSquares := make(chan int)
 	var wg sync.WaitGroup
-	wg.Add(simulationsCount)
-	for i := 0; i < simulationsCount; i++ {
+	wg.Add(workers)
+	for i := 0; i < workers; i++ {
 		go func() {
-			freeSquares <- simulate()
+			for range jobsc {
+				freeSquares <- simulate()
+			}
 			wg.Done()
 		}()
 	}
@@ -53,6 +65,16 @@ func runSimulations(simulationsCount int) float32 {
 		result += n
 	}
 	return float32(result) / float32(simulationsCount)
+}
+
+// jobs returns a channel which will be available to read for as many simulation needs to be done.
+func jobs(count int) <-chan struct{} {
+	out := make(chan struct{}, count)
+	for i := 0; i < count; i++ {
+		out <- struct{}{}
+	}
+	close(out)
+	return out
 }
 
 // simulate performs a simulation by doing jumps for each flea and returns a number of free squares left after simulation
@@ -76,30 +98,24 @@ func jump(i, j int) (int, int) {
 	return i, j
 }
 
-// nextSquare lookups possible adjacent squares and picks next square from them
+// nextSquare calculates which moves are eligible for provided square and returns coordinates of randomly picked move.
 func nextSquare(x, y int) (int, int) {
-	adjacentSquares := make([][]int, 0, 4)
-	var i, j int
-	for _, move := range moves {
-		i = x + move[0]
-		j = y + move[1]
-		if onGrid(i, j) {
-			adjacentSquares = append(adjacentSquares, []int{i, j})
-		}
+	validMoves := make([]int, 0, 4)
+	if x > 0 {
+		validMoves = append(validMoves, moveLeft)
+	}
+	if y > 0 {
+		validMoves = append(validMoves, moveUp)
+	}
+	if x < size-1 {
+		validMoves = append(validMoves, moveRight)
+	}
+	if y < size-1 {
+		validMoves = append(validMoves, moveDown)
 	}
 
-	nextSquare := adjacentSquares[rand.Intn(len(adjacentSquares))]
-	return nextSquare[0], nextSquare[1]
-}
-
-// onGrid returns true if the coordinates of a square (i, j) are located on a grid.
-// If coordinates point outside of the grid - it returns false.
-func onGrid(i, j int) bool {
-	if i < 0 || j < 0 {
-		return false
-	}
-	if i >= size || j >= size {
-		return false
-	}
-	return true
+	moveIndex := validMoves[rand.Intn(len(validMoves))]
+	x += moves[moveIndex][0]
+	y += moves[moveIndex][1]
+	return x, y
 }

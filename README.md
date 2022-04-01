@@ -11,6 +11,12 @@ The script runs `100` simulations of flea circus concurrently inside its own gor
 
 Technically, fleas and rings do not exist in the implementation. The simulation takes every square coordinate, performs "jumps" into possible adjacent squares, and records the result. The result of each jump is stored into a map to make sure it's unique. In the end, the length of the map represents the number of occupied squares. After subtracting this number from a total number of squares we acquire the number of free squares.
 
+###### Edit:
+
+I have changed the concurrency model of a program to a worker pool. Previously each simulation was running in its own goroutine. To check what is the best number of workers for the task I have updated the benchmarks. The results show, that for the task without any I/O there is no advantage to running it concurrently on a single processor system.I have changed the concurrency model of a program to a worker pool. Previously each simulation was running in its own goroutine. To check what is the best number of workers for the task I have updated the benchmarks. The results show, that for the task without any I/O there is no advantage to running it concurrently on a single processor system.I have changed the concurency model of a progrem to a worker pool. Previously each simulation was running in its own goroutine. To check what is the best number of workers for the task I have updated the benchmars. The results shows, for the task without any I/O there is no advantage to run it concurently on a single processor system.
+
+This conclusion is also proven by CPU profiling. Once there is more than one goroutine, runtime starts spending more time/memory to handle additional overhead to manage them instead to run simulations.This conclution is also proven by cpu profiling. Once there is more then one goroutine, runtime starts sppent more time/memory to handle additional overhad to manage them.
+
 # Execution
 
 ```bash
@@ -36,7 +42,13 @@ goos: darwin
 goarch: amd64
 pkg: flea-circus
 cpu: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz
-BenchmarkRunSimulations-12             6         857128091 ns/op        285255842 B/op  17611066 allocs/op
+BenchmarkRunSimulations
+BenchmarkRunSimulations/singe_worker
+BenchmarkRunSimulations/singe_worker-12                       10         107090039 ns/op         4702520 B/op      92004 allocs/op
+BenchmarkRunSimulations/2-workers
+BenchmarkRunSimulations/2-workers-12                           8         138092166 ns/op         4701061 B/op      91994 allocs/op
+BenchmarkRunSimulations/4-workers
+BenchmarkRunSimulations/4-workers-12                           5         228339260 ns/op         4705680 B/op      92004 allocs/op
 PASS
-ok      flea-circus     6.037s
+ok      flea-circus     6.599s
 ```
